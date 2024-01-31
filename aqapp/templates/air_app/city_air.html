@@ -1,0 +1,8 @@
+{% if air_data %}
+    <div class="comparison-container">
+        <div class="city-container">
+            <h2 class="city-name">{{ air_data.city }}</h2>
+            <div class="city-aqi">AQI: {{ air_data.aqi }}</div>
+        </div>
+    </div>
+{% endif %}

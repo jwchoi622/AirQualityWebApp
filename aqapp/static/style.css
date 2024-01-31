@@ -1,0 +1,33 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #fff;
+    color: #333;
+    text-align: center; /* Center text by default */
+}
+h1, h2 {
+    color: #007bff;
+}
+.data-container {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: #f4f4f4;
+    text-align: left; /* Align text to left inside data containers */
+}
+#map {
+    height: 380px;
+    width: 100%;
+    margin: auto; /* Center the map */
+}
+.flex-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center flex items */
+}
+.title-container {
+    text-align: center; /* Center the title */
+    margin-bottom: 20px; /* Add some space below the title */
+}
+
+/* Additional

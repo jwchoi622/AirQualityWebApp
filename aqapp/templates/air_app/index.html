@@ -1,0 +1,275 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Air Quality Index</title>
+
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/core/main.min.css' rel='stylesheet' />
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/daygrid/main.min.css' rel='stylesheet' />
+    <link  rel="stylesheet"  href="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css"  />  
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #fff;
+            color: #333;
+            text-align: center; /* Center text by default */
+        }
+        h1 {
+            color: #007bff;
+        }
+        .flex-row {
+        display: flex;
+        justify-content: center; /* Center the flex items horizontally */
+        flex-wrap: wrap; /* Allow items to wrap as needed */
+        margin-bottom: 50px;
+        background-color: #f2f2f2;
+        }
+
+        .data-container, #map {
+            flex: 1 1 50%; /* Flex grow, flex shrink, flex basis */
+            max-width: 50%; /* Maximum width of 50% for each item */
+            box-sizing: border-box; /* Include padding and border in the element's width and height */
+        }
+
+        #map {
+            height: auto; /* Make the height responsive */
+            aspect-ratio: 1 / 1; /* Maintain square aspect ratio */
+            padding-top: 50%; /* Top padding based on the width to maintain aspect ratio */
+            position: relative; /* Position relative for the map to fill in */
+        }
+
+        .leaflet-container {
+            position: absolute; /* Absolute position for the map to fill in */
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .bottom-section {
+            display: flex;
+            justify-content: center; /* Center the flex items horizontally */
+            flex-wrap: wrap; /* Allow items to wrap as needed */
+            margin-top: 30px; /* Add space above the bottom section */
+            background-color: #f2f2f2;
+            margin-bottom: 100px; /* Add bottom margin */
+        }
+
+        .bottom-container {
+            flex: 1 1 50%; /* Flex grow, flex shrink, flex basis */
+            max-width: 50%; /* Maximum width of 50% for each item */
+            box-sizing: border-box; /* Include padding and border in the element's width and height */
+            padding: 0 15px; /* Add some padding inside the containers */
+        }
+
+        .description-container {
+            background-color: #f2f2f2; /* Example background color */
+            padding: 20px; /* Example padding */
+            margin-bottom: 20px; /* Space below the container */
+            text-align: left; /* Align text to the left */
+            /* Add any other styling as needed */
+        }
+
+        .no-safe-days {
+            margin-top: 50px; /* Adjust the value as needed */
+        }
+
+        #calendar {
+            width: 100%; /* Full width */
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="container mt-4">
+        <div class="title-container">
+            <h1>Air Quality Information</h1>
+
+            <form id="cityForm" action="" method="get" class="form-inline justify-content-center mb-4">
+                <input type="text" name="city" class="form-control mr-2" placeholder="Enter City Name" required>
+                <button type="submit" class="btn btn-primary">Check Air Quality</button>
+            </form>
+
+            <div id="appDescription" class="description-container">
+                <p>Welcome to our Air Quality Index web application. Here, you can enter any city to receive:</p>
+                <ul>
+                    <li>Up-to-date information on its current air quality index.</li>
+                    <li>A PM 2.5 forecast for upcoming days.</li>
+                    <li>An interactive map highlighting the AQI in different areas.</li>
+                    <li>A calendar indicating safe days for outdoor activities based on air quality.</li>
+                </ul>
+                <p><strong>Note:</strong> Not all cities will have a widget, and data for all pollutants may not be available for every city.</p>
+                <p>All the data is sourced from the <a href="https://aqicn.org/api/" target="_blank">AQICN API</a>.</p>
+                <p>Get started by entering a city above!</p>            
+            </div>
+        </div>
+
+        {% if city %}
+            <div class="flex-row">
+                <div class="data-container">
+                        {% if air_quality_data %}
+                            <h2>Current {{ city|title }} Air Quality Data:</h2>
+
+                            <span id="city-aqi-container"></span>
+            
+                            <p><strong>AQI:</strong> {{ air_quality_data.aqi }}</p>
+                            <p><strong>Time updated:</strong> {{ air_quality_data.time }}</p>
+                            <p><strong>PM2.5:</strong> {{ air_quality_data.pm25 }}</p>
+                            <p><strong>PM10:</strong> {{ air_quality_data.pm10 }}</p>
+                            <p><strong>NO2:</strong> {{ air_quality_data.no2 }}</p>
+                            <p><strong>CO:</strong> {{ air_quality_data.co }}</p>
+                            <p><strong>SO2:</strong> {{ air_quality_data.so2 }}</p>
+                            <p><strong>O3:</strong> {{ air_quality_data.o3 }}</p>
+                        {% else %}
+                            <p class="text-danger">No data available.</p>
+                        {% endif %}
+                </div>
+
+                <div id='map' style='position:relative;'></div>
+            </div>
+
+            <div class="bottom-section">
+                {% if air_quality_data.forecast %}
+                    <div class="bottom-container">
+                        {% for pollutant, forecasts in air_quality_data.forecast.items %}
+                            {% if pollutant == "pm25" %} <!-- Focus on PM2.5 Levels Forecast -->
+                                <h3>PM 2.5 Forecast:</h3>
+                                {% for forecast in forecasts %}
+                                    <p>
+                                        <span style="{% if forecast.avg < 50 %}color: green;{% elif forecast.avg >= 50 and forecast.avg <= 100 %}color: #e0e000;{% else %}color: red;{% endif %}"><strong>{{ forecast.day }}:</strong></span>
+                                        Avg: {{ forecast.avg }}, Max: {{ forecast.max }}, Min: {{ forecast.min }}
+                                    </p>
+                                {% endfor %}
+
+                            {% endif %}
+                        {% endfor %}
+                        {% if not safe_day_found %}
+                            <p class="no-safe-days">There are no safe days for outdoor activity in the current forecast.</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                <div class="bottom-container">
+                    <!-- Calendar -->
+                    <div id='calendar'></div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+                               
+    <!-- Initialization Script for the Map with tiles -->
+    <script  src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>  
+    <script>  
+        var  OSM_URL  =  'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';  
+        var  OSM_ATTRIB  =  '&copy;  <a  href="http://openstreetmap.org/copyright">OpenStreetMap</a>  contributors';  
+        var  osmLayer  =  L.tileLayer(OSM_URL,  {  attribution:  OSM_ATTRIB  });  
+    
+        var  WAQI_URL = "/get_map_tile/{z}/{x}/{y}";  // URL to your Django proxy endpoint
+        var  WAQI_ATTR  =  'Air  Quality  Tiles  &copy;  <a  href="http://waqi.info">waqi.info</a>';  
+        var  waqiLayer  =  L.tileLayer(WAQI_URL,  {  attribution:  WAQI_ATTR  });  
+    
+        var  map  =  L.map('map').setView([{{ latitude }},  {{ longitude }}],  11);  
+        map.addLayer(osmLayer).addLayer(waqiLayer);  
+    </script>
+    
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            var form = document.getElementById('cityForm');
+            var message = document.getElementById('initialMessage');
+    
+            form.addEventListener('submit', function() {
+                message.style.display = 'none'; 
+              
+            });
+        });
+    </script>
+    
+
+
+
+    <!-- Initialization Script for the AQI Widget -->
+    <script type="text/javascript" charset="utf-8">  
+        (function (w, d, t, f) {  
+            w[f] = w[f] || function (c, k, n) {  
+                s = w[f], k = s['k'] = (s['k'] || (k ? ('&k=' + k) : ''));  
+                s['c'] = c = (c instanceof Array) ? c : [c];  
+                s['n'] = n = n || 0;  
+                L = d.createElement(t), e = d.getElementsByTagName(t)[0];  
+                L.async = 1;  
+                L.src = '//feed.aqicn.org/feed/' + (c[n].city) + '/' + (c[n].lang || '') + '/feed.v1.js?n=' + n + k;  
+                e.parentNode.insertBefore(L, e);  
+            };  
+        })(window, document, 'script', '_aqiFeed');    
+    </script>
+
+
+    <!-- AQI Widget Activation Script -->
+    <script type="text/javascript" charset="utf-8">
+        // Define a function to initialize the AQI widget
+        function initializeAQIWidget(cityName) {
+            _aqiFeed({
+                display: "%details",
+                container: "city-aqi-container",
+                city: cityName
+            });
+        }
+    
+        document.addEventListener('DOMContentLoaded', function() {
+            var cityName = "{{ city }}";  // The city name from your Django backend
+            if (cityName) {
+                // Check if _aqiFeed is defined, if not, set a timeout to wait for it
+                if (typeof _aqiFeed === "function") {
+                    initializeAQIWidget(cityName);
+                } else {
+                    setTimeout(function() {
+                        initializeAQIWidget(cityName);
+                    }, 1000); // Adjust timeout as needed
+                }
+            }
+        });
+    </script>
+
+    <!-- Calendar -->    
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/core/main.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/daygrid/main.min.js'></script> 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var safeDays = {{ safe_days|safe }};  // Django template tag to pass safe_days
+
+            var calendarEvents = safeDays.map(function(day) {
+                return {
+                    title: 'Safe Air',
+                    start: day,
+                    color: '#28a745'
+                };
+            });
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                plugins: ['dayGrid'],
+                events: calendarEvents,
+                dayRender: function(info) {
+                    // Check if the day cell is the current date
+                    var today = new Date();
+                    if (info.date.getDate() === today.getDate() &&
+                        info.date.getMonth() === today.getMonth() &&
+                        info.date.getFullYear() === today.getFullYear()) {
+                            // Add a label or styling to indicate "Today"
+                            var badge = document.createElement('span');
+                            badge.textContent = 'Today';
+                            badge.style.backgroundColor = 'red'; // Customize as needed
+                            badge.style.color = 'white';
+                            badge.style.padding = '2px';
+                            info.el.appendChild(badge);
+                    }
+                }
+            });
+            calendar.render();
+        });
+    </script>
+    
+</body>
+</html>

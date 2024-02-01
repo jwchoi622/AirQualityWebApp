@@ -20,12 +20,12 @@ This project is a Django-based web application designed to provide up to date ai
 ## External APIs Used
 ### AQICN API
 - **Description:** I used this AQICN to get the air quality data, widget, forecast data and also the map tiles.
-- **Documentation:** [https://aqicn.org/api/](#)
+- **Documentation:** [https://aqicn.org/api/](https://aqicn.org/api/)
 
 ### Leaflet API
 - **Description:** I used the Leaflet API to get an interactive map of the queried city.
-- **Documentation:** [https://leafletjs.com/reference.html](#)
+- **Documentation:** [https://leafletjs.com/reference.html](https://leafletjs.com/reference.html)
 
 ### OpenCage Geocoding API
 - **Description:** I used the OpenCage API to get the latitude and longitude of the city and fed those coordinates into the Leaflet map. 
-- **Documentation:** [https://opencagedata.com/api](#)
+- **Documentation:** [https://opencagedata.com/api](https://opencagedata.com/api)

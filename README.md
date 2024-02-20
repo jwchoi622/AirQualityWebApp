@@ -9,22 +9,22 @@ PM 2.5 예보: 예보는 PM 2.5가 가장 해로운 오염 물질이며 한국�
 달력: 달력은 PM 2.5 지수를 보고 야외 활동에 안전한 날을 표시합니다.
 
 ## **개선사항**
-PM10에 대한 예보를 추가하는 것도 향후 대기질을 판단하는 데 도움이 될 것입니다.
-달력에도 좋음, 보통, 나쁨 대기질에 대한 표시를 포함할 수 있습니다.
-다양한 언어 옵션을 포함시킵니다.
+PM10에 대한 예보를 추가하는 것도 향후 대기질을 판단하는 데 도움이 될 것입니다.  
+달력에도 좋음, 보통, 나쁨 대기질에 대한 표시를 포함할 수 있습니다.  
+다양한 언어 옵션을 포함시킵니다.  
 
 ## **사용된 API**
-**AQICN API**
-설명: AQICN API를 사용하여 대기질 데이터, 위젯, 예보 데이터 및 지도 타일을 가져왔습니다.
-문서: https://aqicn.org/api/
+**AQICN API**  
+설명: AQICN API를 사용하여 대기질 데이터, 위젯, 예보 데이터 및 지도 타일을 가져왔습니다.  
+문서: https://aqicn.org/api/  
 
-**Leaflet API**
-설명: Leaflet API를 사용하여 조회된 도시의 인터랙티브 지도를 가져왔습니다.
-문서: https://leafletjs.com/reference.html
+**Leaflet API**  
+설명: Leaflet API를 사용하여 조회된 도시의 인터랙티브 지도를 가져왔습니다.  
+문서: https://leafletjs.com/reference.html  
 
-**OpenCage 지오코딩 API**
-설명: OpenCage API를 사용하여 도시의 위도와 경도를 가져오고 이 좌표를 Leaflet 지도에 입력했습니다.
-문서: https://opencagedata.com/api
+**OpenCage 지오코딩 API**  
+설명: OpenCage API를 사용하여 도시의 위도와 경도를 가져오고 이 좌표를 Leaflet 지도에 입력했습니다.  
+문서: https://opencagedata.com/api  
 
 
 # [Air Quality Index Web Application with Django]
